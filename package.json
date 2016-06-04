@@ -7,7 +7,10 @@
     "lib/",
     "src/"
   ],
-  "dependencies": {},
+  "dependencies": {
+    "request-promise": "^3.0.0",
+    "retry-promise": "^1.0.0"
+  },
   "devDependencies": {
     "babel-cli": "^6.7.5",
     "babel-eslint": "^6.0.2",
@@ -19,14 +22,17 @@
     "eslint-config-airbnb": "^7.0.0",
     "eslint-plugin-jsx-a11y": "^0.6.2",
     "eslint-plugin-react": "^4.3.0",
-    "tape": "^4.5.1",
-    "nodemon": "^1.9.1"
+    "nodemon": "^1.9.1",
+    "proxyquire": "^1.7.9",
+    "sinon": "^1.17.4",
+    "tap-spec": "^4.1.1",
+    "tape": "^4.5.1"
   },
   "scripts": {
     "start": "node .",
     "build": "./node_modules/babel-cli/bin/babel.js src --out-dir lib",
     "lint": "./node_modules/eslint/bin/eslint.js src/* test/*",
-    "test": "./node_modules/tape/bin/tape test/*.js -r babel-register",
+    "test": "./node_modules/babel-cli/bin/babel-node.js test/*.js",
     "test:watch": "./node_modules/nodemon/bin/nodemon.js -w src -w test -e js -x 'npm run lint && npm run test'",
     "prepublish": "npm run build"
   },
