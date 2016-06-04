@@ -1,50 +1,39 @@
-import test from 'tape';
-import tapSpec from 'tap-spec';
-import proxyquire from 'proxyquire';
-import sinon from 'sinon';
-
-test.createStream()
-  .pipe(tapSpec())
-  .pipe(process.stdout);
+jest.unmock('../src/index');
+jest.mock('request-promise');
+import index from '../src/index';
+import requestPromise from 'request-promise';
+import retry from 'retry-promise';
 
 
-const setup = () => {
-  const requestSpy = sinon.stub();
-  const retrySpy = sinon.stub();
-  return {
-    requestSpy,
-    retrySpy,
-    sut: proxyquire('../src/index', {
-      'request-promise': requestSpy,
-      'retry-promise': {
-        default: (options, retryable) => {
-          retrySpy(options, retryable);
-          retryable();
-        },
-      },
-    }).default,
-  };
-};
+describe('request-retry-promise', () => {
+  it('exists', () => {
+    expect(index)
+      .not.toEqual({});
+  });
 
-test('Called With Default Arguments', (t) => {
-  const { requestSpy, retrySpy, sut } = setup();
-  const uri = 'http://google.com';
-  sut({ uri });
-  t.equal(true, retrySpy.calledWith({
-    max: 5,
-    backoff: 1000,
-  }), 'retryPromise is called with expected args');
-  t.equal(true, requestSpy.calledWith({
-    method: 'GET',
-    uri,
-    json: true,
-    resolveWithFullResponse: true,
-  }), 'requestPromise is called with expected args');
-  t.end();
-});
+  pit('does make a request', () => {
+    const uri = 'http://google.com';
+    requestPromise.mockImplementation(() => new Promise((resolve) => resolve()));
+    retry.mockImplementation((options, retryable) => retryable());
+    return index({ uri })
+      .then(() => {
+        expect(retry)
+          .toBeCalledWith({
+            max: 5,
+            backoff: 1000,
+          }, jasmine.any(Function));
+        expect(requestPromise)
+          .toBeCalledWith({
+            method: 'GET',
+            uri,
+            json: true,
+            resolveWithFullResponse: true,
+          });
+      });
+  });
 
-test('Explodes when missing uri', (t) => {
-  const { sut } = setup();
-  t.throws(() => (sut()), 'boom!');
-  t.end();
+  it('does explode when missing uri param', () => {
+    expect(() => index())
+      .toThrow(Error('Expecting uri parameter in requestOptions'));
+  });
 });
