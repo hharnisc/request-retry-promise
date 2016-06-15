@@ -1,6 +1,6 @@
 {
   "name": "request-retry-promise",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "HTTP request library that retries with backoff and returns a promise",
   "main": "./lib/index.js",
   "files": [
